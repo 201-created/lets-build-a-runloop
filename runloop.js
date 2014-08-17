@@ -1,17 +1,18 @@
 (function(global){
   "use strict";
 
+
   function Runloop(){
     this.tasks = [];
   }
 
   Runloop.currentRunloop = null;
 
-  Runloop.schedule = function(context, task){
+  Runloop.schedule = function(task){
     if (!this.currentRunloop) {
       throw "You cannot schedule a task without a runloop!";
     }
-    this.currentRunloop.tasks.push([context,task]);
+    this.currentRunloop.tasks.push(task);
   };
 
   Runloop.begin = function(){
@@ -21,10 +22,7 @@
   Runloop.end = function(){
     var task;
     while (task = Runloop.currentRunloop.tasks.shift()) {
-      var context = task[0];
-      task = task[1];
-
-      task.call(context);
+      task();
     }
     this.currentRunloop = null;
   };
