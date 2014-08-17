@@ -50,25 +50,38 @@ $.simplemasonry = function(element, options) {
       var imgLoadCount = 0;
 
       if ( $images.length > 0 )
-        $element.addClass('sm-images-waiting').removeClass('sm-images-loaded');
+        Runloop.schedule('render', this, function(){
+          $element.addClass('sm-images-waiting').removeClass('sm-images-loaded');
+        });
 
-      $images.on('load', function(i) {
+      function processImage(i) {
         imgLoadCount++;
         console.timeStamp('load image #' + imgLoadCount + ' of ' + numImages);
         if ( imgLoadCount == numImages ) {
-          Runloop.begin();
-          _sm.resize();
-          $element.removeClass('sm-images-waiting').addClass('sm-images-loaded');
-          Runloop.end();
+          Runloop.schedule('render', this, function(){
+            $element.removeClass('sm-images-waiting').addClass('sm-images-loaded');
+          });
 
           setTimeout(function(){
             // wait a little to let all paints finish
             console.timelineEnd('search');
           }, 150);
         }
+
+        Runloop.scheduleOnce('actions', _sm, _sm.resize);
+      }
+
+      $images.each(function(){
+        if (this.completed) {
+          processImage();
+        } else {
+          $(this).on('load', function(){
+            Runloop.run(this, processImage);
+          });
+        }
       });
 
-      _sm.resize();
+      Runloop.scheduleOnce('actions', _sm, _sm.resize);
     },
 
     resize: function() {
@@ -91,7 +104,7 @@ $.simplemasonry = function(element, options) {
         };
 
         var childElement = $(this);
-        Runloop.schedule(null, function(){
+        Runloop.schedule('render', this, function(){
           childElement.css({'position' : 'absolute'});
           childElement.css(positionProps);
         });
@@ -99,17 +112,17 @@ $.simplemasonry = function(element, options) {
         column_matrix[addToCol] += height;
       };
 
-      console.timeStamp('start rendering children css');
+      $children.each(renderChild);
 
-      $children
-        .css({ 'overflow': 'hidden', 'zoom': '1' })
-        .each(renderChild);
+      Runloop.schedule('render', this, function(){
+        $children.css({ 'overflow': 'hidden', 'zoom': '1' })
+      });
 
-      console.timeStamp('finished rendering children css');
-
-      $element.css({
-        'position': 'relative',
-        'height'  : Array.max(column_matrix) + 'px'
+      Runloop.schedule('render', this, function(){
+        $element.css({
+          'position': 'relative',
+          'height'  : Array.max(column_matrix) + 'px'
+        });
       });
 
       console.timeStamp('resize end');
@@ -117,7 +130,9 @@ $.simplemasonry = function(element, options) {
 
   });
 
-  $(window).resize(_sm.resize);
+  $(window).resize(function(){
+    Runloop.run(_sm, _sm.resize);
+  });
   $element.addClass('sm-loaded');
   _sm.refresh();
 };
@@ -162,10 +177,10 @@ var Query = Backbone.View.extend({
       console.timeline('search');
       console.timeStamp('flickr JSON received');
 
-      Runloop.begin();
-      queryView.updateCount(data.items.length);
-      resultsView.update(data);
-      Runloop.end();
+      Runloop.run(this, function(){
+        queryView.updateCount(data.items.length);
+        resultsView.update(data);
+      });
     });
   }
 });
