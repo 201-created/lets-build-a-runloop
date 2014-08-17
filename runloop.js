@@ -1,18 +1,30 @@
 (function(global){
+  "use strict";
 
-  function Runloop(){}
-
-  Runloop.schedule = function(context, task){
-    throw "Implement schedule";
+  function Runloop(){
+    this.tasks = [];
   }
+
+  Runloop.currentRunloop = null;
+
+  Runloop.schedule = function(task){
+    if (!this.currentRunloop) {
+      throw "You cannot schedule a task without a runloop!";
+    }
+    this.currentRunloop.tasks.push(task);
+  };
 
   Runloop.begin = function(){
-    throw "Implement begin";
-  }
+    this.currentRunloop = new Runloop();
+  };
 
   Runloop.end = function(){
-    throw "Implement end";
-  }
+    var task;
+    while (task = Runloop.currentRunloop.tasks.shift()) {
+      task();
+    }
+    this.currentRunloop = null;
+  };
 
   global.Runloop = Runloop;
 
