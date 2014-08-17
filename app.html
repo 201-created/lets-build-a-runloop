@@ -48,20 +48,24 @@ $.simplemasonry = function(element, options) {
       var $images = $('img', element);
       var numImages = $images.length;
       var imgLoadCount = 0;
+      var hasScheduledResize = false;
 
       if ( $images.length > 0 )
-        Runloop.schedule('render', this, function(){
+        Runloop.schedule(this, function(){
           $element.addClass('sm-images-waiting').removeClass('sm-images-loaded');
-        });
+        }, 'render');
 
       function processImage(i) {
         imgLoadCount++;
         if ( imgLoadCount == numImages ) {
-          Runloop.schedule('render', this, function(){
+          Runloop.schedule(this, function(){
             $element.removeClass('sm-images-waiting').addClass('sm-images-loaded');
-          });
+          }, 'render');
         }
-        Runloop.scheduleOnce('actions', _sm, _sm.resize);
+        if (!hasScheduledResize) {
+          hasScheduledResize = true;
+          Runloop.schedule(_sm, _sm.resize);
+        }
       }
 
       $images.each(function(){
@@ -69,12 +73,16 @@ $.simplemasonry = function(element, options) {
           processImage();
         } else {
           $(this).on('load', function(){
+            hasScheduledResize = false;
             Runloop.run(this, processImage);
           });
         }
       });
 
-      Runloop.scheduleOnce('actions', _sm, _sm.resize);
+      if (!hasScheduledResize) {
+        hasScheduledResize = true;
+        Runloop.schedule(_sm, _sm.resize);
+      }
     },
 
     resize: function() {
@@ -95,26 +103,26 @@ $.simplemasonry = function(element, options) {
         };
 
         var childElement = $(this);
-        Runloop.schedule('render', this, function(){
+        Runloop.schedule(this, function(){
           childElement.css({'position' : 'absolute'});
           childElement.css(positionProps);
-        });
+        }, 'render');
 
         column_matrix[addToCol] += height;
       };
 
       $children.each(renderChild);
 
-      Runloop.schedule('render', this, function(){
+      Runloop.schedule(this, function(){
         $children.css({ 'overflow': 'hidden', 'zoom': '1' })
-      });
+      }, 'render');
 
-      Runloop.schedule('render', this, function(){
+      Runloop.schedule(this, function(){
         $element.css({
           'position': 'relative',
           'height'  : Array.max(column_matrix) + 'px'
         });
-      });
+      }, 'render');
     }
 
   });
