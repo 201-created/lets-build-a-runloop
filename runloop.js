@@ -7,20 +7,7 @@
   }
 
   Runloop.prototype = {
-    scheduleOnce: function(queue, context, task) {
-      var foundTask;
-      for (var i=0;i<this[queue].length;i++) {
-        var queuedTask = this[queue][i];
-        if (queuedTask[0] === context && queuedTask[1] === task) {
-          foundTask = true;
-          break;
-        }
-      }
-      if (!foundTask) {
-        this[queue].push([context, task]);
-      }
-    },
-    schedule: function(queue, context, task) {
+    schedule: function(context, task, queue) {
       this[queue].push([context, task]);
     },
     flush: function(){
@@ -43,11 +30,14 @@
     this.currentRunloop.scheduleOnce(queue, context, task);
   };
 
-  Runloop.schedule = function(queue, context, task){
+  Runloop.schedule = function(context, task, queue){
     if (!this.currentRunloop) {
       throw "You cannot schedule a task without a runloop!";
     }
-    this.currentRunloop.schedule(queue, context, task);
+    if (!queue) {
+      queue = 'actions';
+    }
+    this.currentRunloop.schedule(context, task, queue);
   };
 
   Runloop.run = function(context, fn){
