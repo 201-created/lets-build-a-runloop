@@ -1,0 +1,170 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset=utf-8>
+  <title>Image Search</title>
+  <script src='http://code.jquery.com/jquery.js'></script>
+  <script src='http://underscorejs.org/underscore.js'></script>
+  <script src='http://backbonejs.org/backbone.js'></script>
+  <script src='./runloop.js'></script>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    div.child {
+      width: 24.9%;
+      padding: 11px;
+    }
+    img {
+      width: 100%;
+      padding: 5px;
+      box-shadow: 4px 4px 9px 3px rgba(5,5,5, 0.6);
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <form>
+    <label>Terms</label>
+    <input type="text" name="terms" value="" />
+    <div class="count"></div>
+    <br>
+    <button>Search</button>
+  </form>
+  <div id="results"></div>
+  <div class="footer">~ fin ~</div>
+<script id="jsbin-javascript">
+Array.max = function( array ){
+    return Math.max.apply( Math, array );
+};
+$.simplemasonry = function(element, options) {
+  var $element = $(element);
+  var _sm = this;
+
+  $.extend(_sm, {
+
+    refresh: function() {
+
+      var $images = $('img', element);
+      var numImages = $images.length;
+      var imgLoadCount = 0;
+
+      if ( $images.length > 0 )
+        $element.addClass('sm-images-waiting').removeClass('sm-images-loaded');
+
+      $images.on('load', function(i) {
+        imgLoadCount++;
+        if ( imgLoadCount == numImages ) {
+          _sm.resize();
+          $element.removeClass('sm-images-waiting').addClass('sm-images-loaded');
+        }
+      });
+
+      _sm.resize();
+    },
+
+    resize: function() {
+      var $children = $element.children();
+      var childInfo = childElementInfo($children[0]);
+      var width = childInfo['width'];
+      var columns = childInfo['num'];
+      var column_matrix = initialRange(columns);
+
+      var renderChild = function(i) {
+        var height = $(this).outerHeight();
+        var col = 0;
+        var addToCol = minIndex(column_matrix);
+        var leftPos = Math.round((addToCol * width) * 10) / 10;
+        var positionProps = {
+          'left'     : leftPos + '%',
+          'top'      : column_matrix[addToCol] + 'px'
+        };
+
+        $(this).css({'position' : 'absolute'});
+        $(this).css(positionProps);
+
+        column_matrix[addToCol] += height;
+      };
+
+      $children
+        .css({ 'overflow': 'hidden', 'zoom': '1' })
+        .each(renderChild);
+
+      $element.css({
+        'position': 'relative',
+        'height'  : Array.max(column_matrix) + 'px'
+      });
+    }
+
+  });
+
+  $(window).resize(_sm.resize);
+  $element.addClass('sm-loaded');
+  _sm.refresh();
+};
+
+function minIndex(arry) {
+  var minValue = Math.min.apply(Math, arry);
+  return $.inArray(minValue,arry);
+}
+
+function initialRange(num) {
+  var arry = [];
+  for ( var i=0; i < num; i++ )
+    arry.push(0);
+  return arry;
+}
+
+function childElementInfo(elem) {
+  var width = $(elem).outerWidth();
+  var parentWidth = $(elem).offsetParent().width();
+  return {
+    'width' : 100 * width / parentWidth,
+    'num'   : Math.floor(parentWidth / width)
+  };
+}
+
+var Query = Backbone.View.extend({
+  events: {submit: 'search'},
+  updateCount: function(length){
+    $('.count', this.el).text(''+length+' results');
+  },
+  search: function(e){
+    e.preventDefault();
+    var resultsView = this.resultsView;
+    var queryView = this;
+    var el = $(this.el);
+    var terms = el.find('input').val();
+    $.getJSON("https://api.flickr.com/services/feeds/photos_public.gne?jsoncallback=?", {
+      tags: terms,
+      format: 'json'
+    }, function(data){
+      queryView.updateCount(data.items.length);
+      resultsView.update(data);
+    });
+  }
+});
+
+var Results = Backbone.View.extend({
+  update: function(data){
+    var el = $(this.el);
+    el.empty();
+    var masonry = $('<div>').appendTo(el);
+    data.items.forEach(function(item){
+      $("<img/>").attr("src", item.media.m).appendTo(masonry).wrap('<div class="child"></div>');
+    });
+    new $.simplemasonry(masonry);
+  }
+});
+
+
+$(function(){
+  var resultsView = new Results({ el: $('#results') });
+  var editor= new Query({ el: $('form'), });
+  editor.resultsView = resultsView;
+});
+</script>
+
+
+</body>
+</html>

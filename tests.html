@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Unit Testing Models (Relationships : One-to-One)</title>
+  <meta name="description" content="guide: testing-models-2" />
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="http://code.jquery.com/qunit/qunit-1.14.0.css">
+  <script src='http://code.jquery.com/jquery.js'></script>
+  <script src="http://code.jquery.com/qunit/qunit-1.14.0.js"></script>
+  <script src='http://underscorejs.org/underscore.js'></script>
+  <script src='http://backbonejs.org/backbone.js'></script>
+  <script src='./runloop.js'></script>
+</head>
+<body>
+  <div id="qunit"></div>
+  <div id="ember-testing"></div>
+
+<script>
+module("Has tests");
+
+test("has Runloop", function(){
+  ok(Runloop, "Runloop exists");
+});
+</script>
+</body>
+</html>
+
