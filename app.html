@@ -56,8 +56,10 @@ $.simplemasonry = function(element, options) {
         imgLoadCount++;
         console.timeStamp('load image #' + imgLoadCount + ' of ' + numImages);
         if ( imgLoadCount == numImages ) {
+          Runloop.begin();
           _sm.resize();
           $element.removeClass('sm-images-waiting').addClass('sm-images-loaded');
+          Runloop.end();
 
           setTimeout(function(){
             // wait a little to let all paints finish
@@ -88,8 +90,11 @@ $.simplemasonry = function(element, options) {
           'top'      : column_matrix[addToCol] + 'px'
         };
 
-        $(this).css({'position' : 'absolute'});
-        $(this).css(positionProps);
+        var childElement = $(this);
+        Runloop.schedule(function(){
+          childElement.css({'position' : 'absolute'});
+          childElement.css(positionProps);
+        });
 
         column_matrix[addToCol] += height;
       };
@@ -157,8 +162,10 @@ var Query = Backbone.View.extend({
       console.timeline('search');
       console.timeStamp('flickr JSON received');
 
+      Runloop.begin();
       queryView.updateCount(data.items.length);
       resultsView.update(data);
+      Runloop.end();
     });
   }
 });
