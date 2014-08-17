@@ -5,13 +5,13 @@
     this.tasks = [];
   }
 
-  Runloop.currentRunloop;
+  Runloop.currentRunloop = null;
 
-  Runloop.schedule = function(task){
+  Runloop.schedule = function(context, task){
     if (!this.currentRunloop) {
       throw "You cannot schedule a task without a runloop!";
     }
-    this.currentRunloop.tasks.push(task);
+    this.currentRunloop.tasks.push([context,task]);
   }
 
   Runloop.begin = function(){
@@ -19,9 +19,12 @@
   }
 
   Runloop.end = function(){
-    var task;
-    while (task = Runloop.currentRunloop.tasks.shift()) {
-      task();
+    var taskTuple;
+    while (taskTuple = Runloop.currentRunloop.tasks.shift()) {
+      var context = taskTuple[0],
+          task    = taskTuple[1];
+
+      task.call(context);
     }
     this.currentRunloop = null;
   }
