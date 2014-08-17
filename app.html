@@ -55,8 +55,10 @@ $.simplemasonry = function(element, options) {
       $images.on('load', function(i) {
         imgLoadCount++;
         if ( imgLoadCount == numImages ) {
+          Runloop.begin();
           _sm.resize();
           $element.removeClass('sm-images-waiting').addClass('sm-images-loaded');
+          Runloop.end();
         }
       });
 
@@ -80,8 +82,11 @@ $.simplemasonry = function(element, options) {
           'top'      : column_matrix[addToCol] + 'px'
         };
 
-        $(this).css({'position' : 'absolute'});
-        $(this).css(positionProps);
+        var childElement = $(this);
+        Runloop.schedule(function(){
+          childElement.css({'position' : 'absolute'});
+          childElement.css(positionProps);
+        });
 
         column_matrix[addToCol] += height;
       };
@@ -139,8 +144,10 @@ var Query = Backbone.View.extend({
       tags: terms,
       format: 'json'
     }, function(data){
+      Runloop.begin();
       queryView.updateCount(data.items.length);
       resultsView.update(data);
+      Runloop.end();
     });
   }
 });
