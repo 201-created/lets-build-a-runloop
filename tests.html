@@ -145,6 +145,48 @@ test("Runloop.schedule into nonexistent queue throws", function(){
   });
 });
 
+module("Runloop part 5");
+
+test("Runloop.scheduleOnce only fires once", function(){
+  var runCount = 0;
+
+  Runloop.begin();
+
+  var scheduledAction = function(){
+    runCount++;
+  };
+
+  Runloop.scheduleOnce(null, scheduledAction);
+  Runloop.scheduleOnce(null, scheduledAction);
+
+  Runloop.end();
+
+  equal(runCount, 1, 'scheduleOnce only runs once');
+});
+
+test("Runloop.scheduleOnce only fires once _per queue_", function(){
+  var actionCount = 0, renderCount = 0;
+
+  Runloop.begin();
+
+  var scheduleAction = function(){
+    actionCount++;
+  };
+  var scheduleRender = function(){
+    renderCount++;
+  };
+
+  Runloop.scheduleOnce(null, scheduleAction, 'actions');
+  Runloop.scheduleOnce(null, scheduleRender, 'render');
+  Runloop.scheduleOnce(null, scheduleAction, 'actions');
+  Runloop.scheduleOnce(null, scheduleRender, 'render');
+
+  Runloop.end();
+
+  equal(actionCount, 1, 'scheduleOnce only runs task in actions queue once');
+  equal(renderCount, 1, 'scheduleOnce only runs task in render queue once');
+});
+
 
 
 

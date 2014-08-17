@@ -48,7 +48,6 @@ $.simplemasonry = function(element, options) {
       var $images = $('img', element);
       var numImages = $images.length;
       var imgLoadCount = 0;
-      var hasScheduledResize = false;
 
       if ( $images.length > 0 )
         Runloop.schedule(this, function(){
@@ -62,10 +61,7 @@ $.simplemasonry = function(element, options) {
             $element.removeClass('sm-images-waiting').addClass('sm-images-loaded');
           }, 'render');
         }
-        if (!hasScheduledResize) {
-          hasScheduledResize = true;
-          Runloop.schedule(_sm, _sm.resize);
-        }
+        Runloop.scheduleOnce(_sm, _sm.resize, 'render');
       }
 
       $images.each(function(){
@@ -73,16 +69,12 @@ $.simplemasonry = function(element, options) {
           processImage();
         } else {
           $(this).on('load', function(){
-            hasScheduledResize = false;
             Runloop.run(this, processImage);
           });
         }
       });
 
-      if (!hasScheduledResize) {
-        hasScheduledResize = true;
-        Runloop.schedule(_sm, _sm.resize);
-      }
+      Runloop.scheduleOnce(_sm, _sm.resize, 'render');
     },
 
     resize: function() {
