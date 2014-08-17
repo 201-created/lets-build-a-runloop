@@ -1,32 +1,17 @@
 (function(global){
 
-
-  function Runloop(){
-    this.tasks = [];
-  }
-
-  Runloop.currentRunloop = null;
+  function Runloop(){}
 
   Runloop.schedule = function(context, task){
-    if (!this.currentRunloop) {
-      throw "You cannot schedule a task without a runloop!";
-    }
-    this.currentRunloop.tasks.push([context,task]);
+    throw "Implement schedule";
   }
 
   Runloop.begin = function(){
-    this.currentRunloop = new Runloop();
+    throw "Implement begin";
   }
 
   Runloop.end = function(){
-    var taskTuple;
-    while (taskTuple = Runloop.currentRunloop.tasks.shift()) {
-      var context = taskTuple[0],
-          task    = taskTuple[1];
-
-      task.call(context);
-    }
-    this.currentRunloop = null;
+    throw "Implement end";
   }
 
   global.Runloop = Runloop;
