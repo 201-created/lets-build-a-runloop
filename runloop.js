@@ -1,9 +1,9 @@
 (function(global){
   "use strict";
 
+
   function Runloop(){
-    this.actions = [];
-    this.render = [];
+    this.tasks = [];
   }
 
   Runloop.prototype = {
@@ -51,8 +51,18 @@
   };
 
   Runloop.end = function(){
-    this.currentRunloop.flush();
+    var taskTuple;
+    while (taskTuple = Runloop.currentRunloop.tasks.shift()) {
+      var context = taskTuple[0],
+          task    = taskTuple[1];
+
+      task.call(context);
+    }
     this.currentRunloop = null;
+  };
+
+  Runloop.run = function(){
+    throw "Implement Runloop.run";
   };
 
   global.Runloop = Runloop;
