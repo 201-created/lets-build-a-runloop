@@ -50,19 +50,31 @@ $.simplemasonry = function(element, options) {
       var imgLoadCount = 0;
 
       if ( $images.length > 0 )
-        $element.addClass('sm-images-waiting').removeClass('sm-images-loaded');
+        Runloop.schedule('render', this, function(){
+          $element.addClass('sm-images-waiting').removeClass('sm-images-loaded');
+        });
 
-      $images.on('load', function(i) {
+      function processImage(i) {
         imgLoadCount++;
         if ( imgLoadCount == numImages ) {
-          Runloop.begin();
-          _sm.resize();
-          $element.removeClass('sm-images-waiting').addClass('sm-images-loaded');
-          Runloop.end();
+          Runloop.schedule('render', this, function(){
+            $element.removeClass('sm-images-waiting').addClass('sm-images-loaded');
+          });
+        }
+        Runloop.scheduleOnce('actions', _sm, _sm.resize);
+      }
+
+      $images.each(function(){
+        if (this.completed) {
+          processImage();
+        } else {
+          $(this).on('load', function(){
+            Runloop.run(this, processImage);
+          });
         }
       });
 
-      _sm.resize();
+      Runloop.scheduleOnce('actions', _sm, _sm.resize);
     },
 
     resize: function() {
@@ -83,7 +95,7 @@ $.simplemasonry = function(element, options) {
         };
 
         var childElement = $(this);
-        Runloop.schedule(function(){
+        Runloop.schedule('render', this, function(){
           childElement.css({'position' : 'absolute'});
           childElement.css(positionProps);
         });
@@ -91,19 +103,25 @@ $.simplemasonry = function(element, options) {
         column_matrix[addToCol] += height;
       };
 
-      $children
-        .css({ 'overflow': 'hidden', 'zoom': '1' })
-        .each(renderChild);
+      $children.each(renderChild);
 
-      $element.css({
-        'position': 'relative',
-        'height'  : Array.max(column_matrix) + 'px'
+      Runloop.schedule('render', this, function(){
+        $children.css({ 'overflow': 'hidden', 'zoom': '1' })
+      });
+
+      Runloop.schedule('render', this, function(){
+        $element.css({
+          'position': 'relative',
+          'height'  : Array.max(column_matrix) + 'px'
+        });
       });
     }
 
   });
 
-  $(window).resize(_sm.resize);
+  $(window).resize(function(){
+    Runloop.run(_sm, _sm.resize);
+  });
   $element.addClass('sm-loaded');
   _sm.refresh();
 };
@@ -144,10 +162,10 @@ var Query = Backbone.View.extend({
       tags: terms,
       format: 'json'
     }, function(data){
-      Runloop.begin();
-      queryView.updateCount(data.items.length);
-      resultsView.update(data);
-      Runloop.end();
+      Runloop.run(this, function(){
+        queryView.updateCount(data.items.length);
+        resultsView.update(data);
+      });
     });
   }
 });
