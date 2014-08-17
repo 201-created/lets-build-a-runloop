@@ -82,6 +82,71 @@ test("Runloop.schedule'd tasks are run in correct order", function(){
             "scheduled tasks run in order");
 });
 
+module("Runloop part 4");
+
+test("Runloop.run calls the callback", function(){
+  var itRan = false;
+  Runloop.run(null, function(){
+    itRan = true;
+  });
+
+  ok(itRan, 'Runloop.run executes the passed function');
+});
+
+test("Runloop.run executes with a passed context", function(){
+  var context = {itRan: false};
+
+  Runloop.run(context, function(){
+    this.itRan = true;
+  });
+
+  ok(context.itRan, 'Runloop executes the passed function with the passed context');
+});
+
+test("Runloop.schedule inside Runloop.run", function(){
+  var outer = false, inner = false;
+
+  Runloop.run(null, function(){
+    outer = true;
+    Runloop.schedule(null, function(){
+      inner = true;
+    });
+  });
+
+  ok(outer, '.run callback is executed');
+  ok(inner, 'scheduled task ran');
+});
+
+test("Runloop.schedule into 'render' happens after 'actions'", function(){
+  var tasks = [];
+
+  Runloop.run(null, function(){
+
+    Runloop.schedule(null, function(){
+      tasks.push('second');
+    }, 'render');
+
+    Runloop.schedule(null, function(){
+      tasks.push('first');
+    }, 'actions');
+  });
+
+  deepEqual(tasks, ['first','second'], 'actions queue flushes before render queue');
+});
+
+test("Runloop.schedule into nonexistent queue throws", function(){
+  expect(1);
+
+  Runloop.run(null, function(){
+    throws(function(){
+      Runloop.schedule(null, function(){
+        //
+      }, 'nonexistentqueue');
+    }, 'cannot schedule into nonexistent queue');
+  });
+});
+
+
 
 
 </script>
