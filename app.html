@@ -91,7 +91,7 @@ $.simplemasonry = function(element, options) {
         };
 
         var childElement = $(this);
-        Runloop.schedule(function(){
+        Runloop.schedule(null, function(){
           childElement.css({'position' : 'absolute'});
           childElement.css(positionProps);
         });
