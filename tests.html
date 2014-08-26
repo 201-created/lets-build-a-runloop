@@ -43,7 +43,8 @@ test("Runloop.schedule outside of runloop throws", function(){
     Runloop.schedule(null, function(){
       //
     });
-  });
+  }, /without a runloop/,
+     "includes an error message saying 'without a runloop'");
 });
 
 test("Runloop.schedule is applied with context", function(){
