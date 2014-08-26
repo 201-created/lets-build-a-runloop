@@ -54,9 +54,15 @@ $.simplemasonry = function(element, options) {
 
       $images.on('load', function(i) {
         imgLoadCount++;
+        console.timeStamp('load image #' + imgLoadCount + ' of ' + numImages);
         if ( imgLoadCount == numImages ) {
           _sm.resize();
           $element.removeClass('sm-images-waiting').addClass('sm-images-loaded');
+
+          setTimeout(function(){
+            // wait a little to let all paints finish
+            console.timelineEnd('search');
+          }, 150);
         }
       });
 
@@ -64,6 +70,8 @@ $.simplemasonry = function(element, options) {
     },
 
     resize: function() {
+      console.timeStamp('resize start');
+
       var $children = $element.children();
       var childInfo = childElementInfo($children[0]);
       var width = childInfo['width'];
@@ -86,14 +94,20 @@ $.simplemasonry = function(element, options) {
         column_matrix[addToCol] += height;
       };
 
+      console.timeStamp('start rendering children css');
+
       $children
         .css({ 'overflow': 'hidden', 'zoom': '1' })
         .each(renderChild);
+
+      console.timeStamp('finished rendering children css');
 
       $element.css({
         'position': 'relative',
         'height'  : Array.max(column_matrix) + 'px'
       });
+
+      console.timeStamp('resize end');
     }
 
   });
@@ -135,10 +149,14 @@ var Query = Backbone.View.extend({
     var queryView = this;
     var el = $(this.el);
     var terms = el.find('input').val();
+
+    console.timeline('search');
     $.getJSON("https://api.flickr.com/services/feeds/photos_public.gne?jsoncallback=?", {
       tags: terms,
       format: 'json'
     }, function(data){
+      console.timeStamp('flickr JSON received');
+
       queryView.updateCount(data.items.length);
       resultsView.update(data);
     });
@@ -151,6 +169,7 @@ var Results = Backbone.View.extend({
     el.empty();
     var masonry = $('<div>').appendTo(el);
     data.items.forEach(function(item){
+      console.timeStamp('Append image ' + item.media.m);
       $("<img/>").attr("src", item.media.m).appendTo(masonry).wrap('<div class="child"></div>');
     });
     new $.simplemasonry(masonry);
