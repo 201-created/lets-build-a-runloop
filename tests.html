@@ -142,7 +142,8 @@ test("Runloop.schedule into nonexistent queue throws", function(){
       Runloop.schedule(null, function(){
         //
       }, 'nonexistentqueue');
-    }, 'cannot schedule into nonexistent queue');
+    }, /cannot schedule into a nonexistent queue/,
+       'cannot schedule into nonexistent queue');
   });
 });
 

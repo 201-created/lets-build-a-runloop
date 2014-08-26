@@ -8,6 +8,9 @@
 
   Runloop.prototype = {
     schedule: function(context, task, queue) {
+      if (!this[queue]) {
+        throw "You cannot schedule into a nonexistent queue (" + queue + ")";
+      }
       this[queue].push([context, task]);
     },
     flush: function(){
