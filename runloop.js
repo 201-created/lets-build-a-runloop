@@ -6,9 +6,6 @@
     this.render = [];
   }
 
-<<<<<<< HEAD
-  Runloop.currentRunloop = null;
-=======
   Runloop.prototype = {
     schedule: function(context, task, queue) {
       this[queue].push([context, task]);
@@ -24,19 +21,7 @@
     }
   };
 
-  Runloop.currentRunloop;
->>>>>>> Introduce multiple queues, scheduleOnce
-
-  Runloop.scheduleOnce = function(queue, context, task){
-    if (!this.currentRunloop) {
-      throw "You cannot schedule a task without a runloop!";
-    }
-<<<<<<< HEAD
-    this.currentRunloop.tasks.push(task);
-  };
-=======
-    this.currentRunloop.scheduleOnce(queue, context, task);
-  }
+  Runloop.currentRunloop = null;
 
   Runloop.schedule = function(context, task, queue){
     if (!this.currentRunloop) {
@@ -46,14 +31,13 @@
       queue = 'actions';
     }
     this.currentRunloop.schedule(context, task, queue);
-  }
+  };
 
   Runloop.run = function(context, fn){
     this.begin();
     fn.call(context);
     this.end();
-  }
->>>>>>> Introduce multiple queues, scheduleOnce
+  };
 
   Runloop.begin = function(){
     this.currentRunloop = new Runloop();
