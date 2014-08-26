@@ -2,44 +2,20 @@
   "use strict";
 
   function Runloop(){
-    this.actions = [];
-    this.render = [];
+    this.tasks = [];
   }
-
-  Runloop.prototype = {
-    schedule: function(context, task, queue) {
-      if (!this[queue]) {
-        throw "You cannot schedule into a nonexistent queue (" + queue + ")";
-      }
-      this[queue].push([context, task]);
-    },
-    flush: function(){
-      var task;
-      while (task = this.actions.shift()) {
-        task[1].call(task[0]);
-      }
-      while (task = this.render.shift()) {
-        task[1].call(task[0]);
-      }
-    }
-  };
 
   Runloop.currentRunloop = null;
 
   Runloop.schedule = function(context, task, queue){
     if (!this.currentRunloop) {
-      throw "You cannot schedule a task without a runloop!";
+      throw "You cannot schedule without a runloop!";
     }
-    if (!queue) {
-      queue = 'actions';
-    }
-    this.currentRunloop.schedule(context, task, queue);
+    this.currentRunloop.tasks.push([context, task]);
   };
 
   Runloop.run = function(context, fn){
-    this.begin();
-    fn.call(context);
-    this.end();
+    throw "implement Runloop.run";
   };
 
   Runloop.begin = function(){
@@ -47,7 +23,13 @@
   };
 
   Runloop.end = function(){
-    this.currentRunloop.flush();
+    var taskTuple;
+    while (taskTuple = this.currentRunloop.tasks.shift()) {
+      var context = taskTuple[0],
+            task  = taskTuple[1];
+
+      task.call(context);
+    }
     this.currentRunloop = null;
   };
 
