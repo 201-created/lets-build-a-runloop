@@ -177,11 +177,11 @@ var Query = Backbone.View.extend({
     var el = $(this.el);
     var terms = el.find('input').val();
 
+    console.timeline('search');
     $.getJSON("https://api.flickr.com/services/feeds/photos_public.gne?jsoncallback=?", {
       tags: terms,
       format: 'json'
     }, function(data){
-      console.timeline('search');
       console.timeStamp('flickr JSON received');
 
       Runloop.run(this, function(){
