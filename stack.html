@@ -1,6 +1,13 @@
 <html>
 <body>
 
+<ol>
+  <li>Open dev tools, Sources Panel</li>
+  <li>(Clear any existing recording)</li>
+  <li>Click button below</li>
+  <li>Select "chart" from Source Panel dropdown</li>
+</ol>
+
 <button onclick="stackMe()">Stack It Up</button>
 
 <script type="text/javascript" charset="utf-8">
@@ -32,22 +39,27 @@
   }
 
   function stack1(){
+    console.timeStamp('stack1');
     loop(loopCount);
   }
 
   function stack3(){
+    console.timeStamp('stack3');
     loop(loopCount);
     stack3a();
   }
   function stack3a(){
+    console.timeStamp('stack3a');
     loop(loopCount);
     stack3b();
   }
   function stack3b(){
+    console.timeStamp('stack3b');
     loop(loopCount);
     stack3c();
   }
   function stack3c(){
+    console.timeStamp('stack3c');
     loop(loopCount);
   }
 </script>
