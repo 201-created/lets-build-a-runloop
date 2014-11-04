@@ -1,0 +1,85 @@
+<html>
+<body>
+
+<ol>
+  <li>Open dev tools, Profiles Panel</li>
+  <li>(Clear any existing recording)</li>
+  <li>Click button below</li>
+  <li>Select "chart" from Panel dropdown</li>
+</ol>
+
+<button onclick="stackMe()">Stack It Up</button>
+
+<script type="text/javascript" charset="utf-8">
+  var loopCount = 5000000;
+
+  function stackMe(){
+    // This automatically starts a devtools timeline recording
+    //named 'stacks' if devtools are open
+    console.timeline('stacks');
+
+    // This automatically starts a devtools profile recording
+    // named 'stacks' if devtools are open
+    console.profile('stacks');
+
+    setTimeout(function(){
+        // call `stack1` in a new frame of javascript so that it appears
+        // separately from the same js frame that handles the `click` event
+        stack1();
+    }, 0);
+    setTimeout(function(){
+        // call `stack3` in a new frame of javascript after 30ms
+        stack3();
+    }, 30);
+    setTimeout(function(){
+        // call `stack1` again, 100ms later
+        stack1();
+
+        // give 10ms for `stack1` to finish before
+        // ending the timeline and profile recordings
+        setTimeout(function(){
+          console.timelineEnd('stacks');
+          console.profileEnd('stacks');
+        }, 10);
+    }, 100);
+  }
+
+  // Does nothing `times` times, to generate
+  // something noticeable on the profile/timeline.
+  // If you see nothing (or your machine has difficulty processing),
+  // adjust the `loopCount` variable above up or down.
+  function loop(times){
+    var x = 0;
+    while (x < times) { x++; }
+    return;
+  }
+
+  function stack1(){
+    console.timeStamp('stack1');
+    loop(loopCount);
+  }
+
+  // Stack3 generates several new method calls: `stack3a`, `stack3b`,
+  // and `stack3c`
+  function stack3(){
+    console.timeStamp('stack3');
+    loop(loopCount);
+    stack3a();
+  }
+    function stack3a(){
+      console.timeStamp('stack3a');
+      loop(loopCount);
+      stack3b();
+    }
+      function stack3b(){
+        console.timeStamp('stack3b');
+        loop(loopCount);
+        stack3c();
+      }
+        function stack3c(){
+          console.timeStamp('stack3c');
+          loop(loopCount);
+        }
+</script>
+</body>
+</html>
