@@ -35,8 +35,8 @@
         // call `stack1` again, 100ms later
         stack1();
 
-        // give 10ms for `stack1` to finish before
-        // ending the timeline and profile recordings
+        // give 10ms for the profiler to finish sampling `stack1`
+        // to finish before ending the timeline and profile recordings
         setTimeout(function(){
           console.timelineEnd('stacks');
           console.profileEnd('stacks');
@@ -59,7 +59,7 @@
     loop(loopCount);
   }
 
-  // Stack3 generates several new method calls: `stack3a`, `stack3b`,
+  // Stack3 adds several new functions to the stack: `stack3a`, `stack3b`,
   // and `stack3c`
   function stack3(){
     console.timeStamp('stack3');
