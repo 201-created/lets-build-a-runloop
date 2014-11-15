@@ -15,7 +15,7 @@
   <div id="ember-testing"></div>
 
 <script>
-module("Has tests");
+module("Exercise B");
 
 test("has Runloop", function(){
   ok(Runloop, "Runloop exists");
@@ -81,7 +81,7 @@ test("Runloop.schedule'd tasks are run in correct order", function(){
             "scheduled tasks run in order");
 });
 
-module("Runloop part 4");
+module("Exercise C");
 
 test("Runloop.run calls the callback", function(){
   var itRan = false;
@@ -146,6 +146,70 @@ test("Runloop.schedule into nonexistent queue throws", function(){
   });
 });
 
+module("Exercise D");
+
+test("Runloop.scheduleOnce only runs once", function(){
+  expect(1);
+
+  var runs = 0;
+
+  function work(){
+    runs++;
+  };
+
+  Runloop.run(null, function(){
+    Runloop.scheduleOnce(null, work);
+    Runloop.scheduleOnce(null, work);
+  });
+
+  equal(runs, 1, 'work onlys runs once');
+});
+
+test("Runloop.scheduleOnce only coalesces schedules with same context and action", function(){
+  expect(2);
+
+  var aRuns = 0;
+  var bRuns = 0;
+
+  var contextA = {};
+  var contextB = {};
+
+  function workA(){
+    aRuns++;
+  };
+
+  function workB(){
+    bRuns++;
+  };
+
+  Runloop.run(null, function(){
+    Runloop.scheduleOnce(contextA, workA);
+    Runloop.scheduleOnce(contextA, workB);
+    Runloop.scheduleOnce(contextB, workB);
+  });
+
+  equal(aRuns, 1, 'workA runs one time');
+  equal(bRuns, 2, 'workB runs two times');
+});
+
+test("Runloop.scheduleOnce only runs once per queue", function(){
+  expect(1);
+
+  var runs = 0;
+
+  function work(){
+    runs++;
+  };
+
+  Runloop.run(null, function(){
+    Runloop.scheduleOnce(null, work, 'actions');
+    Runloop.scheduleOnce(null, work, 'actions');
+    Runloop.scheduleOnce(null, work, 'render');
+    Runloop.scheduleOnce(null, work, 'render');
+  });
+
+  equal(runs, 2, 'work runs two times');
+});
 
 
 

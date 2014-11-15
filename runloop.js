@@ -7,6 +7,17 @@
   }
 
   Runloop.prototype = {
+    scheduleOnce: function(context, task, queue) {
+      if (!this[queue]) {
+        throw "You cannot schedule into a nonexistent queue (" + queue + ")";
+      }
+      for (var i=0;i<this[queue].length;i++) {
+        if (this[queue][i][0] === context && this[queue][i][1] === task) {
+          return;
+        }
+      }
+      this[queue].push([context, task]);
+    },
     schedule: function(context, task, queue) {
       if (!this[queue]) {
         throw "You cannot schedule into a nonexistent queue (" + queue + ")";
@@ -34,6 +45,16 @@
       queue = 'actions';
     }
     this.currentRunloop.schedule(context, task, queue);
+  };
+
+  Runloop.scheduleOnce = function(context, task, queue){
+    if (!this.currentRunloop) {
+      throw "You cannot schedule a task without a runloop!";
+    }
+    if (!queue) {
+      queue = 'actions';
+    }
+    this.currentRunloop.scheduleOnce(context, task, queue);
   };
 
   Runloop.run = function(context, fn){
